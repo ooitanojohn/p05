@@ -1,6 +1,4 @@
 <?php
-require_once 'Data.php';
-/* 1次元配列を作ると二次元配列にインスタンス化した[id,配列要素]を格納する */
 class UserArrayData
 {
     private $array;
@@ -9,28 +7,26 @@ class UserArrayData
     {
         $this->array = $array;
     }
-    public function getArray()
+    public function getUserData()
     {
-        return $this->id;
+        return $this->array;
     }
-
-    public function UserData($arrayName)
+    // 1次元配列 obj化
+    public function UserData()
     {
         foreach ($this->array as $key => $val) {
-            ${$arrayName . $key} = new UserData($key, $val);
-            ${$arrayName . 's'}[] = ${$arrayName . $key};
+            $arrayName = [$key, $val];
+            $arrayNames[] = $arrayName;
         }
-        return ${$arrayName . 's'};
+        return $arrayNames;
     }
     /* 個別受け取り */
     // name指定のデータ受け取り
-    public function findByData($Data, $name)
+    public function findByData($name)
     {
-        if ($Data !== NULL) {
-            foreach ($Data as $key => $val) {
-                if ($key === $name) {
-                    return $val;
-                }
+        foreach ($this->array as $key => $val) {
+            if ($key == $name) {
+                return $val;
             }
         }
     }
@@ -47,8 +43,11 @@ class UserArrayData
         $rec .= "\n"; // 終端に改行を付加し、csvレコード完成
         return $rec;
     }
-    /*  */
-    public function csvWrite()
+    /* $fnameのファイル名にcsvRecを書き込み */
+    public function csvWrite($fname, $rec)
     {
+        $fp = fopen($fname, 'a'); // ファイル追加オープン
+        fputs($fp, $rec); // ファイル追加書込
+        fclose($fp); // ファイルクローズ
     }
 }

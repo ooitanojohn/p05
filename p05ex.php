@@ -5,11 +5,11 @@
 
 //********************* 配列初期化 **************************
 /* PASS配列(DB) */
-$passTbl = [
-    '川島',
-    '田中',
-    '山本',
-    '川田'
+$nameTbl = [
+    ['name' => '川島', 'pass' => 'aaaa'],
+    ['name' => '田中', 'pass' => 'bbbb'],
+    ['name' => '山本', 'pass' => 'cccc'],
+    ['name' => '川田', 'pass' => 'dddd']
 ];
 /* ErrMsg配列 */
 $ErrMsg = [
@@ -18,6 +18,8 @@ $ErrMsg = [
 ];
 /* LoginMsg */
 $LoginMsg = '';
+$userId = '';
+$userName = '';
 
 /* フォーム受け取り */
 require_once 'model/validate.php';
@@ -37,7 +39,7 @@ if ($postData !== NULL) {
         case $form->ValidateNumeric($id):
             $ErrMsg['id'] = 'IDが数値ではありません。';
             break;
-        case $form->ValidateNumericSize($id, $passTbl):
+        case $form->ValidateNumericSize($id, $nameTbl):
             $ErrMsg['id'] = 'IDが存在しません';
             break;
         default:
@@ -50,30 +52,29 @@ if ($postData !== NULL) {
     /* 入力エラーなければ*/
     $ErrJudge = array_filter($ErrMsg);
     if (empty($ErrJudge)) {
-        // インスタンス化してusers配列に
-        require_once 'model/Data.php';
-        foreach ($passTbl as $key => $val) {
-            ${'user' . $key} = new UserData($key, $val);
-            $users[] = ${'user' . $key};
-        }
+        require_once 'model/newArrayAutoInstance.php';
+        $userData = new UserArrayData($nameTbl);
+
         /* ユーザーIDから配列よりPASS取得 */
-        $passData =  ${'user' . $id}->getPass();
+        $nameData = $nameTbl[$id]['name'];
+        $passData = $nameTbl[$id]['pass'];
         /* 入力されたpassと配列のpassを比較して認証 */
+        $span = '失敗';
         if ($pass === $passData) {
-            $LoginMsg = 'Login完了 ユーザー名 : ' . ${'user' . $id}->getId();
-        } else {
-            $LoginMsg =
-                $LoginMsg = 'Login失敗 ユーザー名 : ' . ${'user' . $id}->getId();
+            $span = '成功';
+            $userId = $id;
+            $userName = $nameData;
         }
+        $LoginMsg = 'Login' . $span . ' ユーザー名 : ' . $nameData;
+        // csv出力
+        date_default_timezone_set('Asia/Tokyo');
+        $rec = date('Y-m-d H:i:s') . ' ';
+        $rec .= $LoginMsg;
+        $rec .= "\n";
+        $userData->csvWrite('data.txt', $rec);
     }
 }
-require_once 'model/newArrayAutoInstance.php';
-$test = new UserArrayData($passTbl);
-$teachers = $test->UserData('teacher');
 
-echo '$teachers:';
-var_dump($teachers);
-echo '<br>';
 
 ?>
 <!DOCTYPE html>
@@ -110,11 +111,11 @@ echo '<br>';
     <table border="1">
         <tr>
             <td width="130">ユーザーID</td>
-            <td width="130"><?php echo $users[0]->getId() ?></td>
+            <td width="130"><?php echo $userId ?></td>
         </tr>
         <tr>
             <td>ユーザー名</td>
-            <td><?php echo $users[0]->getPass() ?></td>
+            <td><?php echo $userName ?></td>
         </tr>
     </table>
 

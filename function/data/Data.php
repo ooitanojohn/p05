@@ -45,7 +45,21 @@ class UserData
         return $rec;
     }
     /*  */
-    public function csvWrite()
+    public function csvWrite($fname, $rec)
     {
+        $fp = fopen($fname, 'a'); // ファイル追加オープン
+        fputs($fp, $rec); // ファイル追加書込
+        fclose($fp); // ファイルクローズ
+    }
+}
+
+// インスタンス化してusers配列に
+require_once 'model/Data.php';
+
+function newArrayInstance($array, $name)
+{
+    foreach ($array as $key => $val) {
+        ${$name . $key} = new UserData($key, $val);
+        ${$name . $key}[] = ${$name . $key};
     }
 }
